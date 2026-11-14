@@ -1,4 +1,14 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  --night: #101b2a;
+  --panel: #26394c;
+  --cream: #fff0cf;
+  --gold: #ffe5a3;
+  --blue: #b9d8e8;
+  --pink: #d58a9a;
+}
 
 * {
   box-sizing: border-box;
@@ -9,8 +19,8 @@
 
 body {
   min-height: 100vh;
-  background: #101b2a;
-  color: #fff4df;
+  background: var(--night);
+  color: var(--cream);
   font-family: 'Press Start 2P', monospace;
   display: flex;
   justify-content: center;
@@ -23,7 +33,7 @@ body {
   max-width: 480px;
   height: 100vh;
   height: 100dvh;
-  max-height: 850px;
+  max-height: 900px;
   display: flex;
   flex-direction: column;
   padding: 12px;
@@ -31,22 +41,22 @@ body {
 }
 
 .game-header {
+  flex-shrink: 0;
   text-align: center;
   padding: 8px 0;
-  flex-shrink: 0;
 }
 
 .game-title {
-  color: #ffe5a3;
-  font-size: 22px;
+  color: var(--gold);
+  font-size: 23px;
   letter-spacing: 5px;
   text-shadow: 3px 3px #8b536c;
 }
 
 .game-subtitle {
-  margin-top: 8px;
+  margin-top: 9px;
   font-size: 8px;
-  color: #b9d8e8;
+  color: var(--blue);
 }
 
 #game-screen {
@@ -55,8 +65,8 @@ body {
   min-height: 0;
   overflow: hidden;
   border: 4px solid #d6c49c;
-  border-radius: 8px;
-  background: #b8d9e9;
+  border-radius: 7px;
+  background: #dcebf0;
   box-shadow: 0 0 0 4px #26394c;
 }
 
@@ -71,13 +81,13 @@ body {
 .screen {
   position: absolute;
   inset: 0;
+  z-index: 5;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 12px;
-  background: rgba(14, 27, 43, 0.78);
+  padding: 14px;
+  background: rgba(12, 23, 37, 0.78);
   text-align: center;
-  z-index: 2;
 }
 
 .hidden {
@@ -88,46 +98,56 @@ body {
 .ending-content,
 .battle-panel {
   width: 100%;
-  padding: 20px 14px;
-  background: #26394c;
-  border: 3px solid #ffe5a3;
+  max-width: 370px;
+  padding: 22px 16px;
+  background: var(--panel);
+  border: 3px solid var(--gold);
   box-shadow: 5px 5px #101b2a;
 }
 
-h1 {
-  color: #ffe5a3;
-  font-size: 15px;
-  line-height: 1.8;
+.intro-decoration,
+.ending-decoration {
+  color: var(--pink);
+  font-size: 28px;
   margin-bottom: 18px;
+}
+
+h1 {
+  color: var(--gold);
+  font-size: 15px;
+  line-height: 2;
+  margin-bottom: 16px;
 }
 
 h2 {
   color: #ffd7a0;
   font-size: 12px;
-  line-height: 1.8;
+  line-height: 1.9;
   margin-bottom: 18px;
 }
 
 p {
   font-size: 9px;
-  line-height: 2;
+  line-height: 2.2;
 }
 
 button {
+  display: block;
   width: 100%;
-  padding: 14px 8px;
-  margin-top: 12px;
+  padding: 15px 9px;
+  margin-top: 13px;
   border: 3px solid #fff0c8;
-  background: #d58a79;
+  background: #bd7e8d;
   color: #fff8e9;
   font-family: inherit;
   font-size: 8px;
-  line-height: 1.8;
+  line-height: 2;
   cursor: pointer;
   box-shadow: 3px 3px #101b2a;
+  transition: transform 0.08s;
 }
 
-button:active:not(:disabled) {
+button:active {
   transform: translate(2px, 2px);
   box-shadow: 1px 1px #101b2a;
 }
@@ -137,32 +157,33 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.battle-panel {
-  max-width: 350px;
+.health-section {
+  margin: 14px 0;
+  text-align: left;
 }
 
 .health-label {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   gap: 5px;
-  margin: 12px 0 6px;
+  margin-bottom: 7px;
   font-size: 7px;
-  color: #e8e0d0;
+  line-height: 1.8;
+  color: var(--cream);
 }
 
 .health-bar {
   width: 100%;
-  height: 13px;
-  background: #593b46;
+  height: 15px;
+  background: #513543;
   border: 2px solid #fff0c8;
   overflow: hidden;
 }
 
 .health-fill {
-  height: 100%;
   width: 100%;
-  transition: width 0.3s ease;
+  height: 100%;
+  transition: width 0.35s ease;
 }
 
 .enemy-fill {
@@ -170,56 +191,59 @@ button:disabled {
 }
 
 .player-fill {
-  background: #91ce91;
-}
-
-.player-label {
-  margin-top: 16px;
-  color: #ffe5a3;
+  background: #9dd58f;
 }
 
 #battle-message {
-  min-height: 68px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 14px 0 8px;
-  padding: 8px;
-  color: #e7d8bd;
+  min-height: 76px;
+  margin: 16px 0 10px;
+  padding: 10px;
+  background: #1b2d3e;
+  border: 2px solid #72899b;
+  color: #f5e6ca;
   font-size: 8px;
-  line-height: 2;
-  border-top: 1px solid #65778a;
-  border-bottom: 1px solid #65778a;
+  line-height: 2.2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #battle-actions {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 #battle-actions button {
-  margin-top: 8px;
+  margin-top: 9px;
 }
 
-.heal-counter {
-  margin-top: 12px;
-  color: #b9d8e8;
-  font-size: 7px;
+#attack-button {
+  background: #a76e67;
+}
+
+#heal-button {
+  background: #647e9b;
+}
+
+.ending-signature {
+  margin-top: 20px;
+  color: var(--gold);
+  font-size: 8px;
 }
 
 .game-footer {
+  flex-shrink: 0;
   text-align: center;
   padding: 5px;
-  color: #b9d8e8;
+  color: var(--blue);
   font-size: 7px;
-  flex-shrink: 0;
 }
 
-@media (max-height: 650px) {
+@media (max-height: 700px) {
   #game {
-    gap: 4px;
     padding: 5px;
+    gap: 4px;
   }
 
   .game-header {
@@ -227,28 +251,44 @@ button:disabled {
   }
 
   .game-title {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   .game-subtitle {
-    margin-top: 4px;
+    margin-top: 5px;
   }
 
-  .game-footer {
-    padding: 2px;
-  }
-
+  .intro-content,
+  .ending-content,
   .battle-panel {
-    padding: 12px 10px;
+    padding: 14px 10px;
+  }
+
+  .health-section {
+    margin: 9px 0;
   }
 
   #battle-message {
-    min-height: 48px;
-    margin: 8px 0;
+    min-height: 55px;
+    margin: 9px 0;
   }
 
   button {
-    padding: 10px 6px;
-    margin-top: 7px;
+    padding: 10px 7px;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 350px) {
+  .health-label {
+    font-size: 6px;
+  }
+
+  h1 {
+    font-size: 12px;
+  }
+
+  h2 {
+    font-size: 10px;
   }
 }
