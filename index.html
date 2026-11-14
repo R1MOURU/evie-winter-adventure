@@ -8,23 +8,19 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <main id="game">
-
     <header class="game-header">
       <div class="game-title">EVIE</div>
       <div class="game-subtitle">A Winter Adventure</div>
     </header>
 
     <section id="game-screen">
-
       <canvas id="game-canvas" width="270" height="480">
         Your browser does not support canvas.
       </canvas>
 
       <div id="intro-screen" class="screen">
         <div class="intro-content">
-          <div class="intro-decoration">❄</div>
           <h1>A Winter Adventure</h1>
           <p>A little journey through a snowy forest...</p>
           <button id="start-button">Start Adventure</button>
@@ -33,62 +29,61 @@
 
       <div id="battle-screen" class="screen hidden">
         <div class="battle-panel">
-
           <h2 id="enemy-name">Enemy</h2>
 
-          <div class="health-section">
-            <div class="health-label">
-              <span>ENEMY</span>
-              <span id="enemy-hp-text">100 / 100</span>
-            </div>
-            <div class="health-bar">
-              <div id="enemy-health" class="health-fill enemy-fill"></div>
-            </div>
+          <div class="health-label">
+            <span>Enemy HP</span>
+            <span id="enemy-hp-text">80 / 80</span>
+          </div>
+          <div class="health-bar">
+            <div id="enemy-health" class="health-fill enemy-fill"></div>
           </div>
 
-          <div class="health-section">
-            <div class="health-label">
-              <span>PRINCESS EVIE</span>
-              <span id="player-hp-text">100 / 100</span>
-            </div>
-            <div class="health-bar">
-              <div id="player-health" class="health-fill player-fill"></div>
-            </div>
+          <div class="health-label player-label">
+            <span>Princess Evie</span>
+            <span id="player-hp-text">100 / 100</span>
+          </div>
+          <div class="health-bar">
+            <div id="player-health" class="health-fill player-fill"></div>
           </div>
 
-          <p id="battle-message">An enemy appeared!</p>
+          <p id="battle-message">A new challenge appeared!</p>
 
           <div id="battle-actions">
-            <button id="attack-button">Coffee Splash</button>
-            <button id="heal-button">Text My Boyfriend</button>
+            <button id="attack-button">Coffee Splash [DMG]</button>
+            <button id="heal-button">Text My Boyfriend [HP UP]</button>
           </div>
 
+          <p id="heal-counter" class="heal-counter">
+            Boyfriend texts left: 3
+          </p>
+        </div>
+      </div>
+
+      <div id="victory-screen" class="screen hidden">
+        <div class="ending-content">
+          <div class="victory-heart">♥</div>
+          <h1 id="victory-title">Victory!</h1>
+          <p id="victory-message"></p>
+          <button id="continue-button">Continue Adventure</button>
         </div>
       </div>
 
       <div id="ending-screen" class="screen hidden">
         <div class="ending-content">
-          <div class="ending-decoration">♥</div>
-          <h1>Finally, the beach!</h1>
           <p id="ending-message"></p>
-          <p class="ending-signature">Made with love ❤️</p>
+          <button id="restart-button">Play Again ❤️</button>
         </div>
       </div>
 
-      <div id="gameover-screen" class="screen hidden">
+      <div id="game-over-screen" class="screen hidden">
         <div class="ending-content">
-          <h1>Take a Little Rest</h1>
-          <p>Even princesses need a break sometimes.</p>
-          <button id="restart-button">Try Again</button>
+          <h1>Take a Little Break</h1>
+          <p>The journey was difficult, but you can always try again.</p>
+          <button id="retry-button">Try Again ❤️</button>
         </div>
       </div>
-
     </section>
-
-    <footer class="game-footer">
-      <p>A little adventure, made with love ❤️</p>
-    </footer>
-
   </main>
 
   <script src="game.js"></script>
