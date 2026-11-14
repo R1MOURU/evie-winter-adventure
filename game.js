@@ -595,7 +595,7 @@ function playerHeal() {
   updateHealthBars();
   updateHealCounter();
 
-  later(enemyAttack, 2600);
+  later(enemyAttack, 2000);
 }
 
 function winBattle() {
