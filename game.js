@@ -5,70 +5,82 @@ const $ = id => document.getElementById(id);
 
 const introScreen = $("intro-screen");
 const battleScreen = $("battle-screen");
+const victoryScreen = $("victory-screen");
 const endingScreen = $("ending-screen");
-const gameoverScreen = $("gameover-screen");
+const gameOverScreen = $("game-over-screen");
 
 const startButton = $("start-button");
+const retryButton = $("retry-button");
 const restartButton = $("restart-button");
+const continueButton = $("continue-button");
+
 const attackButton = $("attack-button");
 const healButton = $("heal-button");
 
 const enemyName = $("enemy-name");
 const enemyHealth = $("enemy-health");
 const playerHealth = $("player-health");
-const enemyHPText = $("enemy-hp-text");
-const playerHPText = $("player-hp-text");
+const enemyHpText = $("enemy-hp-text");
+const playerHpText = $("player-hp-text");
 const battleMessage = $("battle-message");
+const healCounter = $("heal-counter");
+
+const victoryTitle = $("victory-title");
+const victoryMessage = $("victory-message");
 const endingMessage = $("ending-message");
 
 const W = canvas.width;
 const H = canvas.height;
 
 const MAX_PLAYER_HP = 100;
+const MAX_HEALS = 3;
 
 let state = "intro";
 let progress = 0;
+let lastTime = 0;
 let playerHP = MAX_PLAYER_HP;
 let currentEnemy = null;
 let healUses = 0;
-let lastTime = 0;
-let animationTime = 0;
 let snowflakes = [];
+let animationTime = 0;
 let actionLocked = false;
 
 const enemies = [
   {
-    position: 0.23,
+    position: 0.22,
     name: "The Fatigue",
-    maxHP: 65,
-    hp: 65,
-    damage: [8, 12],
+    maxHP: 80,
     attacks: ["Energy Drain", "Sleepy Fog"],
-    defeated: false,
-    type: "fatigue"
+    damage: [11, 15],
+    victoryTitle: "Fatigue defeated!",
+    victoryMessage:
+      "You defeated Fatigue! Even the sleepiest monster couldn't stop you. You're doing amazing, princess! ❤️",
+    defeated: false
   },
   {
-    position: 0.49,
+    position: 0.48,
     name: "The Annoying Colleague",
-    maxHP: 75,
-    hp: 75,
-    damage: [10, 14],
+    maxHP: 95,
     attacks: [
       "WHY ARE YOU TALKING SO QUIET?!",
       "Say That Again!"
     ],
-    defeated: false,
-    type: "colleague"
+    damage: [13, 17],
+    victoryTitle: "Problem solved!",
+    victoryMessage:
+      "The annoying colleague has been thrown into the trash can! Maybe now he'll finally stop asking you to speak louder! 🤣",
+    defeated: false
   },
   {
-    position: 0.75,
+    position: 0.74,
     name: "The Examinator",
-    maxHP: 90,
-    hp: 90,
-    damage: [12, 17],
+    maxHP: 110,
     attacks: ["Tricky Question", "Pop Quiz!"],
-    defeated: false,
-    type: "exam"
+    damage: [15, 19],
+    victoryTitle: "The Examinator is defeated!",
+    victoryMessage:
+      "You conquered the Examinator! No tricky question can measure how wonderful you are! ❤️",
+    defeated: false
   }
 ];
 
@@ -78,7 +90,10 @@ const loveMessages = [
   "You're my favorite person in the whole world.",
   "Sending you a little kiss! 💋",
   "I love you more than all the stars.",
-  "Can't wait to hug you again. ❤️"
+  "Can't wait to hug you again. ❤️",
+  "You make even the hardest days better.",
+  "I wish I could cuddle with you right now.",
+  "You're always in my heart. ❤️"
 ];
 
 const coffeeMessages = [
@@ -91,33 +106,6 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-// The road and Evie's movement use exactly the same curve.
-function roadX(p) {
-  return 135 + Math.sin(p * Math.PI * 2.1) * 29
-            + Math.sin(p * Math.PI * 4.0) * 9;
-}
-
-function roadY(p) {
-  return 430 - p * 350;
-}
-
-function initSnow() {
-  snowflakes = [];
-
-  for (let i = 0; i < 55; i++) {
-    snowflakes.push({
-      x: random(0, W),
-      y: random(0, H),
-      speed: random(15, 42),
-      size: random(1, 3)
-    });
-  }
-}
-
 function drawPixel(x, y, width, height, color) {
   ctx.fillStyle = color;
   ctx.fillRect(
@@ -128,274 +116,190 @@ function drawPixel(x, y, width, height, color) {
   );
 }
 
+function drawPrincess(x, y, scale = 1) {
+  ctx.save();
+  ctx.translate(Math.round(x), Math.round(y));
+  ctx.scale(scale, scale);
+
+  const bob = state === "walking"
+    ? Math.sin(animationTime * 8) * 1.5
+    : Math.sin(animationTime * 3) * 0.5;
+
+  ctx.translate(0, bob);
+
+  // Curly dark hair
+  drawPixel(-10, -23, 20, 18, "#39272b");
+  drawPixel(-13, -19, 5, 19, "#39272b");
+  drawPixel(8, -19, 5, 19, "#39272b");
+  drawPixel(-12, -25, 6, 7, "#51343a");
+  drawPixel(7, -27, 6, 8, "#51343a");
+  drawPixel(-10, -31, 7, 7, "#51343a");
+  drawPixel(1, -33, 7, 8, "#51343a");
+
+  // Face
+  drawPixel(-7, -23, 14, 13, "#edbd9e");
+  drawPixel(-8, -20, 2, 7, "#edbd9e");
+
+  // Eyes
+  drawPixel(-4, -18, 2, 2, "#593a2f");
+  drawPixel(4, -18, 2, 2, "#593a2f");
+
+  // Hair fringe
+  drawPixel(-7, -25, 7, 5, "#39272b");
+  drawPixel(1, -27, 6, 5, "#39272b");
+
+  // Crown
+  drawPixel(-7, -35, 14, 4, "#f5cf75");
+  drawPixel(-6, -39, 4, 5, "#f5cf75");
+  drawPixel(2, -40, 4, 6, "#f5cf75");
+  drawPixel(-1, -37, 3, 4, "#fff0b0");
+
+  // Neck and collar
+  drawPixel(-3, -10, 6, 5, "#edbd9e");
+  drawPixel(-7, -8, 14, 4, "#fff0d9");
+
+  // Winter dress
+  drawPixel(-9, -5, 18, 15, "#a85e83");
+  drawPixel(-13, 5, 26, 7, "#a85e83");
+  drawPixel(-8, -3, 16, 3, "#d18eaa");
+  drawPixel(-2, 0, 4, 8, "#f1d5a7");
+
+  // Sleeves
+  drawPixel(-14, -4, 5, 9, "#d6e5e8");
+  drawPixel(9, -4, 5, 9, "#d6e5e8");
+
+  // Boots
+  drawPixel(-8, 12, 6, 5, "#57465e");
+  drawPixel(2, 12, 6, 5, "#57465e");
+
+  // Hair curls
+  drawPixel(-14, -15, 4, 4, "#51343a");
+  drawPixel(10, -13, 4, 4, "#51343a");
+  drawPixel(-13, -7, 4, 4, "#51343a");
+  drawPixel(10, -6, 4, 4, "#51343a");
+
+  ctx.restore();
+}
+
+function drawEnemy(x, y, type, scale = 1) {
+  ctx.save();
+  ctx.translate(Math.round(x), Math.round(y));
+  ctx.scale(scale, scale);
+
+  const bob = Math.sin(animationTime * 4) * 1.5;
+  ctx.translate(0, bob);
+
+  if (type === 0) {
+    // The Fatigue
+    drawPixel(-15, -12, 30, 25, "#708b9c");
+    drawPixel(-12, -17, 24, 8, "#8da8b3");
+    drawPixel(-19, -4, 5, 13, "#708b9c");
+    drawPixel(14, -4, 5, 13, "#708b9c");
+    drawPixel(-10, 13, 7, 5, "#536d7d");
+    drawPixel(4, 13, 7, 5, "#536d7d");
+
+    drawPixel(-8, -4, 5, 2, "#33434e");
+    drawPixel(4, -4, 5, 2, "#33434e");
+    drawPixel(-3, 5, 7, 2, "#33434e");
+    drawPixel(-4, -21, 8, 5, "#e5eef0");
+  }
+
+  if (type === 1) {
+    // The Annoying Colleague
+    drawPixel(-13, -17, 26, 25, "#d5a37c");
+    drawPixel(-10, -23, 20, 8, "#47383a");
+    drawPixel(-14, -12, 28, 5, "#47383a");
+
+    drawPixel(-8, -7, 4, 4, "#332a2b");
+    drawPixel(4, -7, 4, 4, "#332a2b");
+    drawPixel(-4, 2, 8, 4, "#6b3535");
+
+    drawPixel(-17, 8, 34, 12, "#5b718e");
+    drawPixel(-10, 20, 7, 5, "#353746");
+    drawPixel(3, 20, 7, 5, "#353746");
+
+    drawPixel(-3, -20, 6, 3, "#d9d4c9");
+  }
+
+  if (type === 2) {
+    // The Examinator
+    drawPixel(-17, -14, 34, 30, "#55466f");
+    drawPixel(-13, -21, 26, 10, "#786a99");
+    drawPixel(-20, -8, 5, 16, "#786a99");
+    drawPixel(15, -8, 5, 16, "#786a99");
+
+    drawPixel(-10, -7, 5, 5, "#ffe7a1");
+    drawPixel(5, -7, 5, 5, "#ffe7a1");
+    drawPixel(-8, -6, 2, 3, "#30253d");
+    drawPixel(7, -6, 2, 3, "#30253d");
+
+    drawPixel(-7, 7, 14, 3, "#30253d");
+    drawPixel(-12, 16, 8, 6, "#403652");
+    drawPixel(4, 16, 8, 6, "#403652");
+    drawPixel(-5, -27, 10, 7, "#d9c4ff");
+  }
+
+  ctx.restore();
+}
+
 function drawTree(x, y, scale = 1) {
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(scale, scale);
 
-  drawPixel(-3, 0, 6, 13, "#66504b");
+  drawPixel(-3, 0, 6, 12, "#65504a");
 
-  drawPixel(-11, -15, 22, 15, "#28534d");
-  drawPixel(-8, -25, 16, 13, "#32685a");
-  drawPixel(-5, -34, 10, 11, "#3d7662");
+  drawPixel(-10, -13, 20, 14, "#28544d");
+  drawPixel(-8, -23, 16, 13, "#31685c");
+  drawPixel(-5, -31, 10, 11, "#397768");
 
-  drawPixel(-8, -15, 16, 3, "#dceef0");
-  drawPixel(-5, -25, 10, 3, "#e9f4f1");
-  drawPixel(-3, -34, 6, 3, "#f6fbf6");
-
-  ctx.restore();
-}
-
-function drawPrincess(x, y, walking = false) {
-  const bob = walking ? Math.sin(animationTime * 9) * 2 : 0;
-  const px = Math.round(x);
-  const py = Math.round(y + bob);
-
-  ctx.save();
-
-  // Long curly dark hair
-  drawPixel(px - 10, py - 19, 20, 23, "#422a32");
-  drawPixel(px - 13, py - 11, 5, 18, "#49303a");
-  drawPixel(px + 8, py - 12, 5, 19, "#49303a");
-  drawPixel(px - 12, py + 2, 5, 6, "#49303a");
-  drawPixel(px + 8, py + 2, 5, 6, "#49303a");
-
-  // Face
-  drawPixel(px - 7, py - 18, 14, 14, "#edbd9e");
-  drawPixel(px - 8, py - 14, 2, 7, "#edbd9e");
-  drawPixel(px + 6, py - 14, 2, 7, "#edbd9e");
-
-  // Hair fringe
-  drawPixel(px - 7, py - 21, 14, 5, "#422a32");
-  drawPixel(px - 5, py - 17, 5, 3, "#422a32");
-
-  // Brown eyes
-  drawPixel(px - 4, py - 12, 2, 2, "#68402e");
-  drawPixel(px + 3, py - 12, 2, 2, "#68402e");
-
-  // Blush
-  drawPixel(px - 6, py - 8, 3, 2, "#d98d87");
-  drawPixel(px + 4, py - 8, 3, 2, "#d98d87");
-
-  // Golden crown
-  drawPixel(px - 7, py - 25, 14, 3, "#e9bd62");
-  drawPixel(px - 6, py - 28, 3, 4, "#f8d985");
-  drawPixel(px - 1, py - 30, 3, 6, "#ffe7a0");
-  drawPixel(px + 4, py - 28, 3, 4, "#f8d985");
-  drawPixel(px - 1, py - 25, 3, 2, "#c98288");
-
-  // Winter dress
-  drawPixel(px - 8, py - 4, 16, 10, "#a75f85");
-  drawPixel(px - 10, py + 2, 20, 7, "#bd779b");
-  drawPixel(px - 12, py + 7, 24, 5, "#a75f85");
-
-  // White collar
-  drawPixel(px - 5, py - 5, 10, 3, "#fff0d8");
-
-  // Dress decoration
-  drawPixel(px - 1, py + 1, 3, 3, "#f4d79b");
-
-  // Sleeves
-  drawPixel(px - 12, py - 2, 5, 8, "#a75f85");
-  drawPixel(px + 7, py - 2, 5, 8, "#a75f85");
-
-  // Arms
-  drawPixel(px - 11, py + 4, 3, 5, "#edbd9e");
-  drawPixel(px + 8, py + 4, 3, 5, "#edbd9e");
-
-  // Boots
-  const step = walking ? Math.sin(animationTime * 9) * 2 : 0;
-  drawPixel(px - 7, py + 12 + step, 5, 4, "#57445e");
-  drawPixel(px + 3, py + 12 - step, 5, 4, "#57445e");
+  drawPixel(-8, -13, 16, 3, "#e7f1ed");
+  drawPixel(-5, -23, 10, 3, "#e7f1ed");
 
   ctx.restore();
-}
-
-function drawFatigue(x, y) {
-  const bob = Math.sin(animationTime * 3) * 2;
-
-  ctx.save();
-  ctx.translate(x, y + bob);
-
-  // Body
-  drawPixel(-13, -12, 26, 22, "#718c98");
-  drawPixel(-17, -6, 34, 14, "#627c89");
-  drawPixel(-10, -17, 20, 8, "#829da4");
-
-  // Sleepy hood
-  drawPixel(-12, -17, 24, 5, "#506b79");
-
-  // Eyes
-  drawPixel(-8, -4, 5, 2, "#f4e5c8");
-  drawPixel(4, -4, 5, 2, "#f4e5c8");
-
-  // Mouth
-  drawPixel(-2, 4, 5, 2, "#3b4755");
-
-  // Arms
-  drawPixel(-20, -5, 5, 12, "#627c89");
-  drawPixel(15, -5, 5, 12, "#627c89");
-
-  // Feet
-  drawPixel(-10, 10, 7, 5, "#485e6c");
-  drawPixel(3, 10, 7, 5, "#485e6c");
-
-  ctx.restore();
-}
-
-function drawColleague(x, y) {
-  const bob = Math.sin(animationTime * 5) * 1.5;
-
-  ctx.save();
-  ctx.translate(x, y + bob);
-
-  // Hair
-  drawPixel(-10, -19, 20, 9, "#543c32");
-  drawPixel(-13, -14, 4, 10, "#543c32");
-
-  // Face
-  drawPixel(-9, -13, 18, 17, "#e4b18e");
-
-  // Eyes
-  drawPixel(-6, -7, 3, 3, "#352c32");
-  drawPixel(4, -7, 3, 3, "#352c32");
-
-  // Eyebrows
-  drawPixel(-8, -11, 6, 2, "#49312d");
-  drawPixel(3, -11, 6, 2, "#49312d");
-
-  // Annoyed mouth
-  drawPixel(-3, 1, 8, 2, "#813e4b");
-
-  // Office clothes
-  drawPixel(-10, 4, 20, 15, "#586c8a");
-  drawPixel(-13, 9, 26, 8, "#465875");
-
-  // Shirt and tie
-  drawPixel(-3, 4, 7, 6, "#f0e6d5");
-  drawPixel(-1, 9, 3, 7, "#b65b62");
-
-  // Arms
-  drawPixel(-16, 6, 5, 13, "#586c8a");
-  drawPixel(11, 6, 5, 13, "#586c8a");
-
-  // Shoes
-  drawPixel(-9, 19, 7, 4, "#413b4c");
-  drawPixel(3, 19, 7, 4, "#413b4c");
-
-  ctx.restore();
-}
-
-function drawExaminator(x, y) {
-  const bob = Math.sin(animationTime * 4) * 2;
-
-  ctx.save();
-  ctx.translate(x, y + bob);
-
-  // Shadow cloak
-  drawPixel(-15, -12, 30, 29, "#4e426e");
-  drawPixel(-20, -3, 40, 17, "#40395f");
-  drawPixel(-16, 14, 32, 7, "#342f50");
-
-  // Head
-  drawPixel(-11, -22, 22, 17, "#74678d");
-  drawPixel(-14, -18, 28, 9, "#625578");
-
-  // Hood
-  drawPixel(-14, -25, 28, 7, "#39334f");
-  drawPixel(-10, -30, 20, 7, "#514666");
-
-  // Glowing eyes
-  drawPixel(-7, -17, 5, 4, "#ffe28e");
-  drawPixel(3, -17, 5, 4, "#ffe28e");
-
-  // Book
-  drawPixel(15, 1, 10, 13, "#b88a61");
-  drawPixel(17, 3, 6, 9, "#f3d9a7");
-  drawPixel(20, 3, 2, 9, "#805d51");
-
-  // Cloak details
-  drawPixel(-3, -1, 6, 12, "#a38bb2");
-  drawPixel(-1, 3, 2, 4, "#ffe3a0");
-
-  ctx.restore();
-}
-
-function drawEnemy(enemy, x, y) {
-  if (enemy.type === "fatigue") {
-    drawFatigue(x, y);
-  } else if (enemy.type === "colleague") {
-    drawColleague(x, y);
-  } else {
-    drawExaminator(x, y);
-  }
 }
 
 function drawForest() {
   ctx.fillStyle = "#dcebf0";
   ctx.fillRect(0, 0, W, H);
 
-  // Distant snow
-  ctx.fillStyle = "#c2dce6";
-  ctx.fillRect(0, 65, W, 95);
-  ctx.fillRect(0, 270, W, 120);
+  ctx.fillStyle = "#c0dce5";
+  ctx.fillRect(0, 70, W, 120);
+  ctx.fillRect(0, 310, W, 110);
 
-  // Winding trail, following the same curve as Evie
+  // Winding path
   ctx.fillStyle = "#e8d9c0";
   ctx.beginPath();
-
-  for (let i = 0; i <= 100; i++) {
-    const p = i / 100;
-    const x = roadX(p) - 37;
-    const y = roadY(p);
-
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-
-  for (let i = 100; i >= 0; i--) {
-    const p = i / 100;
-    const x = roadX(p) + 37;
-    const y = roadY(p);
-
-    ctx.lineTo(x, y);
-  }
-
+  ctx.moveTo(100, 0);
+  ctx.lineTo(160, 0);
+  ctx.lineTo(170, 110);
+  ctx.lineTo(115, 220);
+  ctx.lineTo(145, 340);
+  ctx.lineTo(100, 480);
+  ctx.lineTo(0, 480);
+  ctx.lineTo(0, 350);
+  ctx.lineTo(65, 220);
+  ctx.lineTo(75, 110);
   ctx.closePath();
   ctx.fill();
 
-  // Soft center of the path
-  ctx.strokeStyle = "#f5ead7";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
+  // Snow on the path
+  ctx.fillStyle = "#f7ead5";
+  ctx.fillRect(93, 0, 28, 80);
 
-  for (let i = 0; i <= 100; i++) {
-    const p = i / 100;
-    const x = roadX(p);
-    const y = roadY(p);
-
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+  // Trees
+  for (let y = -20; y < H + 50; y += 90) {
+    drawTree(22, y + 25, 1.1);
+    drawTree(245, y + 60, 1.1);
+    drawTree(65, y + 80, 0.7);
+    drawTree(195, y + 5, 0.7);
   }
 
-  ctx.stroke();
-
-  // Trees placed along the road edges
-  for (let i = 0; i < 11; i++) {
-    const p = i / 10;
-    const x = roadX(p);
-    const y = roadY(p);
-
-    drawTree(x - 65, y + 15, 0.9);
-    drawTree(x + 65, y - 10, 1.05);
-  }
-
-  // Snow details
-  ctx.fillStyle = "#ffffff";
-
-  for (let i = 0; i < 28; i++) {
-    const x = (i * 79 + 23) % W;
-    const y = (i * 113 + 41) % H;
+  // Snow patches
+  ctx.fillStyle = "#fff";
+  for (let i = 0; i < 32; i++) {
+    const x = (i * 73) % W;
+    const y = (i * 107 + progress * 100) % H;
     ctx.fillRect(x, y, 3, 3);
   }
 }
@@ -404,89 +308,39 @@ function drawBeach() {
   ctx.fillStyle = "#f1d9a8";
   ctx.fillRect(0, 0, W, H);
 
-  // Ocean
-  ctx.fillStyle = "#66b9c5";
-  ctx.fillRect(0, 0, W, 145);
+  // Sea
+  ctx.fillStyle = "#77c3ce";
+  ctx.fillRect(0, 0, W, 115);
 
-  ctx.fillStyle = "#4d9eae";
-  ctx.fillRect(0, 23, W, 10);
-  ctx.fillRect(0, 55, W, 7);
-  ctx.fillRect(0, 90, W, 9);
-  ctx.fillRect(0, 125, W, 7);
+  ctx.fillStyle = "#55aebc";
+  ctx.fillRect(0, 22, W, 10);
+  ctx.fillRect(0, 55, W, 8);
+  ctx.fillRect(0, 83, W, 10);
 
   // Sun
-  ctx.fillStyle = "#ffe6a0";
-  ctx.fillRect(205, 30, 30, 30);
+  drawPixel(210, 35, 28, 28, "#ffe8a9");
 
-  // Sand
-  ctx.fillStyle = "#f6e4bd";
-  ctx.fillRect(0, 145, W, H - 145);
+  // Shore
+  ctx.fillStyle = "#fff0c8";
+  ctx.fillRect(0, 120, W, 8);
 
-  ctx.fillStyle = "#fff0ce";
-  ctx.fillRect(0, 141, W, 7);
-
-  // Small beach details
-  ctx.fillStyle = "#d4b98d";
-  ctx.fillRect(35, 250, 8, 4);
-  ctx.fillRect(210, 330, 6, 4);
-
-  drawPrincess(135, 275, false);
+  drawPrincess(135, 275, 1.7);
 
   // Heart
-  ctx.fillStyle = "#d87983";
-  ctx.fillRect(125, 229, 7, 7);
-  ctx.fillRect(135, 229, 7, 7);
-  ctx.fillRect(128, 236, 11, 6);
-  ctx.fillRect(131, 242, 5, 4);
+  drawPixel(125, 215, 7, 7, "#d87983");
+  drawPixel(136, 215, 7, 7, "#d87983");
+  drawPixel(129, 222, 10, 7, "#d87983");
+  drawPixel(132, 229, 4, 4, "#d87983");
 }
 
-function render() {
-  ctx.clearRect(0, 0, W, H);
-
-  if (progress >= 1) {
-    drawBeach();
-    return;
-  }
-
-  drawForest();
-
-  // Enemy sprites along the road
-  enemies.forEach(enemy => {
-    if (!enemy.defeated && enemy !== currentEnemy) {
-      const distance = Math.abs(progress - enemy.position);
-
-      if (distance < 0.12) {
-        drawEnemy(
-          enemy,
-          roadX(enemy.position),
-          roadY(enemy.position) - 5
-        );
-      }
-    }
-  });
-
-  // Evie always stays on the road center
-  const heroX = roadX(progress);
-  const heroY = roadY(progress);
-
-  drawPrincess(
-    heroX,
-    heroY,
-    state === "walking"
-  );
-
-  // Battle enemy stays visible behind the battle window
-  if (state === "battle" && currentEnemy) {
-    drawEnemy(currentEnemy, 135, 145);
-  }
-
+function drawSnow() {
   snowflakes.forEach(flake => {
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(
-      Math.round(flake.x),
-      Math.round(flake.y),
+    drawPixel(
+      flake.x,
+      flake.y,
       flake.size,
-      flake.size
+      flake.size,
+      "#ffffff"
     );
   });
 }
@@ -496,35 +350,93 @@ function updateSnow(delta) {
     flake.y += flake.speed * delta;
 
     if (flake.y > H) {
-      flake.y = -3;
+      flake.y = 0;
       flake.x = random(0, W);
     }
   });
 }
 
-function updateHealthBars() {
-  if (!currentEnemy) return;
+function render() {
+  ctx.clearRect(0, 0, W, H);
 
-  const enemyPercent = clamp(
-    currentEnemy.hp / currentEnemy.maxHP * 100,
+  if (state === "ending") {
+    drawBeach();
+    return;
+  }
+
+  if (state === "intro") {
+    drawForest();
+    drawSnow();
+    drawPrincess(135, 360);
+    return;
+  }
+
+  if (state === "battle" && currentEnemy) {
+    ctx.fillStyle = "#c5dce3";
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = "#e8d9c0";
+    ctx.fillRect(0, 300, W, 180);
+
+    drawTree(25, 250, 1.1);
+    drawTree(245, 250, 1.1);
+
+    drawEnemy(
+      135,
+      160,
+      enemies.indexOf(currentEnemy),
+      2.1
+    );
+
+    drawPrincess(135, 325, 1.8);
+    return;
+  }
+
+  drawForest();
+
+  const heroY = 390 - progress * 300;
+  drawPrincess(135, heroY);
+
+  enemies.forEach((enemy, index) => {
+    if (
+      !enemy.defeated &&
+      progress < enemy.position &&
+      progress > enemy.position - 0.13
+    ) {
+      drawEnemy(135, heroY - 55, index, 1.1);
+    }
+  });
+
+  drawSnow();
+}
+
+function updateHealthBars() {
+  const enemyPercent = Math.max(
     0,
-    100
+    currentEnemy
+      ? currentEnemy.hp / currentEnemy.maxHP * 100
+      : 0
   );
 
-  const playerPercent = clamp(
-    playerHP / MAX_PLAYER_HP * 100,
+  const playerPercent = Math.max(
     0,
-    100
+    playerHP / MAX_PLAYER_HP * 100
   );
 
   enemyHealth.style.width = enemyPercent + "%";
   playerHealth.style.width = playerPercent + "%";
 
-  enemyHPText.textContent =
-    Math.max(0, currentEnemy.hp) + " / " + currentEnemy.maxHP;
+  enemyHpText.textContent = currentEnemy
+    ? currentEnemy.hp + " / " + currentEnemy.maxHP
+    : "0 / 0";
 
-  playerHPText.textContent =
-    Math.max(0, playerHP) + " / " + MAX_PLAYER_HP;
+  playerHpText.textContent =
+    playerHP + " / " + MAX_PLAYER_HP;
+}
+
+function updateHealCounter() {
+  healCounter.textContent =
+    "Boyfriend texts left: " + (MAX_HEALS - healUses);
 }
 
 function startBattle(enemy) {
@@ -540,72 +452,11 @@ function startBattle(enemy) {
 
   attackButton.disabled = false;
   healButton.disabled = false;
-  healButton.textContent = "Text My Boyfriend";
 
   updateHealthBars();
+  updateHealCounter();
 
   battleScreen.classList.remove("hidden");
-}
-
-function endTurn() {
-  if (state !== "battle") return;
-
-  actionLocked = true;
-  attackButton.disabled = true;
-  healButton.disabled = true;
-
-  setTimeout(enemyAttack, 900);
-}
-
-function playerAttack() {
-  if (state !== "battle" || actionLocked) return;
-
-  const damage = random(27, 37);
-  currentEnemy.hp = Math.max(0, currentEnemy.hp - damage);
-
-  battleMessage.textContent =
-    coffeeMessages[random(0, coffeeMessages.length - 1)] +
-    " (" + damage + " damage!)";
-
-  updateHealthBars();
-
-  if (currentEnemy.hp <= 0) {
-    winBattle();
-    return;
-  }
-
-  endTurn();
-}
-
-function playerHeal() {
-  if (state !== "battle" || actionLocked) return;
-  if (healUses >= 2) return;
-
-  healUses++;
-
-  const healing = random(22, 30);
-  const oldHP = playerHP;
-
-  playerHP = Math.min(MAX_PLAYER_HP, playerHP + healing);
-
-  const actualHealing = playerHP - oldHP;
-  const message = loveMessages[
-    random(0, loveMessages.length - 1)
-  ];
-
-  battleMessage.textContent =
-    message + " (+" + actualHealing + " HP)";
-
-  healButton.textContent =
-    "Text My Boyfriend (" + (2 - healUses) + " left)";
-
-  updateHealthBars();
-
-  if (healUses >= 2) {
-    healButton.disabled = true;
-  }
-
-  endTurn();
 }
 
 function enemyAttack() {
@@ -628,53 +479,137 @@ function enemyAttack() {
   updateHealthBars();
 
   if (playerHP <= 0) {
-    loseBattle();
+    setTimeout(gameOver, 700);
     return;
   }
 
   actionLocked = false;
   attackButton.disabled = false;
-  healButton.disabled = healUses >= 2;
+  healButton.disabled = healUses >= MAX_HEALS;
+}
+
+function playerAttack() {
+  if (state !== "battle" || actionLocked) return;
+
+  actionLocked = true;
+  attackButton.disabled = true;
+  healButton.disabled = true;
+
+  const damage = random(22, 34);
+
+  currentEnemy.hp = Math.max(
+    0,
+    currentEnemy.hp - damage
+  );
+
+  battleMessage.textContent =
+    coffeeMessages[
+      random(0, coffeeMessages.length - 1)
+    ] + " (" + damage + " damage!)";
+
+  updateHealthBars();
+
+  if (currentEnemy.hp <= 0) {
+    setTimeout(winBattle, 800);
+  } else {
+    setTimeout(enemyAttack, 900);
+  }
+}
+
+function playerHeal() {
+  if (state !== "battle" || actionLocked) return;
+
+  if (healUses >= MAX_HEALS) {
+    battleMessage.textContent =
+      "No more messages for now! ❤️";
+    return;
+  }
+
+  if (playerHP >= MAX_PLAYER_HP) {
+    battleMessage.textContent =
+      "You're already doing great! ❤️";
+    return;
+  }
+
+  actionLocked = true;
+  attackButton.disabled = true;
+  healButton.disabled = true;
+
+  healUses++;
+
+  const healing = random(24, 32);
+
+  playerHP = Math.min(
+    MAX_PLAYER_HP,
+    playerHP + healing
+  );
+
+  const message = loveMessages[
+    random(0, loveMessages.length - 1)
+  ];
+
+  battleMessage.textContent =
+    message + " (+" + healing + " HP)";
+
+  updateHealthBars();
+  updateHealCounter();
+
+  setTimeout(enemyAttack, 900);
 }
 
 function winBattle() {
-  state = "walking";
-  actionLocked = true;
+  if (state !== "battle" || !currentEnemy) return;
 
   currentEnemy.defeated = true;
+  actionLocked = true;
 
-  battleMessage.textContent =
-    "You did it! Keep going, Evie! ❤️";
+  attackButton.disabled = true;
+  healButton.disabled = true;
+
+  const defeatedEnemy = currentEnemy;
 
   setTimeout(() => {
     battleScreen.classList.add("hidden");
-    currentEnemy = null;
-    actionLocked = false;
 
-    // Move slightly beyond the encounter point.
-    progress = Math.min(0.99, progress + 0.005);
-  }, 1300);
+    victoryTitle.textContent =
+      defeatedEnemy.victoryTitle;
+
+    victoryMessage.textContent =
+      defeatedEnemy.victoryMessage;
+
+    victoryScreen.classList.remove("hidden");
+
+    state = "victory";
+  }, 800);
 }
 
-function loseBattle() {
+function continueAdventure() {
+  if (state !== "victory") return;
+
+  victoryScreen.classList.add("hidden");
+
+  currentEnemy = null;
+  actionLocked = false;
+
+  state = "walking";
+}
+
+function gameOver() {
   state = "gameover";
-  actionLocked = true;
 
   battleScreen.classList.add("hidden");
-  gameoverScreen.classList.remove("hidden");
+  gameOverScreen.classList.remove("hidden");
 }
 
 function finishGame() {
   state = "ending";
   progress = 1;
 
-  battleScreen.classList.add("hidden");
-
   endingMessage.textContent =
     "You made it through the snow, Evie. " +
-    "Even on the hardest days, remember that " +
-    "someone believes in you, is proud of you, " +
-    "and loves you more than words can say❤️";
+    "No matter how difficult the journey gets, " +
+    "remember that someone is always cheering for you. " +
+    "I love you. ❤️";
 
   endingScreen.classList.remove("hidden");
 }
@@ -693,8 +628,12 @@ function startGame() {
 
   introScreen.classList.add("hidden");
   battleScreen.classList.add("hidden");
+  victoryScreen.classList.add("hidden");
   endingScreen.classList.add("hidden");
-  gameoverScreen.classList.add("hidden");
+  gameOverScreen.classList.add("hidden");
+
+  updateHealthBars();
+  updateHealCounter();
 
   state = "walking";
 }
@@ -708,18 +647,17 @@ function gameLoop(timestamp) {
   lastTime = timestamp;
   animationTime += delta;
 
-  updateSnow(delta);
-
   if (state === "walking") {
-    progress = Math.min(1, progress + delta * 0.035);
+    progress += delta * 0.035;
+
+    updateSnow(delta);
 
     if (progress >= 1) {
       finishGame();
     } else {
-      const nextEnemy = enemies.find(
-        enemy =>
-          !enemy.defeated &&
-          progress >= enemy.position
+      const nextEnemy = enemies.find(enemy =>
+        !enemy.defeated &&
+        progress >= enemy.position
       );
 
       if (nextEnemy) {
@@ -729,16 +667,37 @@ function gameLoop(timestamp) {
     }
   }
 
-  render();
+  if (state === "battle" || state === "victory") {
+    updateSnow(delta);
+  }
 
+  render();
   requestAnimationFrame(gameLoop);
 }
 
+function initSnow() {
+  snowflakes = [];
+
+  for (let i = 0; i < 45; i++) {
+    snowflakes.push({
+      x: random(0, W),
+      y: random(0, H),
+      speed: random(15, 40),
+      size: random(1, 3)
+    });
+  }
+}
+
 startButton.addEventListener("click", startGame);
+retryButton.addEventListener("click", startGame);
 restartButton.addEventListener("click", startGame);
+continueButton.addEventListener("click", continueAdventure);
 
 attackButton.addEventListener("click", playerAttack);
 healButton.addEventListener("click", playerHeal);
 
 initSnow();
+updateHealthBars();
+updateHealCounter();
+
 requestAnimationFrame(gameLoop);
