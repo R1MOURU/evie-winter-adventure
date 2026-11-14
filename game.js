@@ -56,7 +56,7 @@ const enemies = [
     damage: [11, 15],
     victoryTitle: "Fatigue defeated!",
     victoryMessage:
-      "You defeated Fatigue! Even the sleepiest monster couldn't stop you. You're doing amazing, princess! ❤️",
+      "You defeated Fatigue! Even the sleepiest monster couldn't stop you. You're doing amazing, princess!❤️",
     defeated: false
   },
   {
@@ -70,7 +70,7 @@ const enemies = [
     damage: [13, 17],
     victoryTitle: "Problem solved!",
     victoryMessage:
-      "The annoying colleague has been thrown into the trash can! Maybe now he'll finally stop asking you to speak louder! 🤣",
+      "The annoying colleague has been thrown into the trash can! Maybe now he'll finally stop asking you to speak louder!🤣",
     defeated: false
   },
   {
@@ -81,24 +81,24 @@ const enemies = [
     damage: [15, 19],
     victoryTitle: "The Examinator is defeated!",
     victoryMessage:
-      "You conquered the Examinator! No tricky question can measure how wonderful you are! ❤️",
+      "You conquered the Examinator! No tricky question can measure how wonderful you are!❤️",
     defeated: false
   }
 ];
 
 const loveMessages = [
-  "Just thinking about you makes me smile. ❤️",
-  "I wish you were here with me right now.",
-  "You're my favorite person in the whole world.",
-  "Sending you a little kiss! 💋",
-  "I love you more than all the stars.",
-  "Can't wait to hug you again. ❤️",
-  "You make even the hardest days better.",
+  "Just thinking about you makes me smile❤️",
+  "I wish you were here with me right now",
+  "You're my favorite person in the whole world",
+  "Sending you a little kiss!💋",
+  "I love you more than all the stars",
+  "Can't wait to hug you again❤️",
+  "You make even the hardest days better",
   "I wish I could cuddle with you right now.",
-  "You're always in my heart. ❤️",
+  "You're always in my heart❤️",
   "I miss your hugs. Sending you a thousand kisses!",
-  "You're my safe place. ❤️",
-  "I hope you know how special you are to me."
+  "You're my safe place❤️",
+  "I hope you know how special you are to me"
 ];
 
 const coffeeMessages = [
@@ -545,7 +545,7 @@ function playerHeal() {
 
   if (playerHP >= MAX_PLAYER_HP) {
     battleMessage.textContent =
-      "You're already doing great! ❤️";
+      "You're already doing great!❤️";
     return;
   }
 
@@ -570,7 +570,7 @@ function playerHeal() {
   updateHealthBars();
   updateHealCounter();
 
-  later(enemyAttack, 3000);
+  later(enemyAttack, 2800);
 }
 
 function winBattle() {
@@ -620,7 +620,7 @@ function finishGame() {
     "You made it through the snow, Evie. " +
     "No matter how difficult the journey gets, " +
     "remember that someone is always cheering for you. " +
-    "I love you. ❤️";
+    "Te amo❤️";
 
   showScreen("ending");
 }
