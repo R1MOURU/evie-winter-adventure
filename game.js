@@ -157,7 +157,7 @@ function roadX(p) {
 }
 
 function roadY(p) {
-  return 420 - p * 340;
+  return 400 - p * 300;
 }
 
 function drawPrincess(x, y, scale = 1) {
@@ -313,11 +313,11 @@ function drawForest() {
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.strokeStyle = "#e8d9c0";
-  ctx.lineWidth = 14;
+  ctx.lineWidth = 12;
   ctx.stroke();
 
   ctx.strokeStyle = "#f7ead5";
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 2;
   ctx.stroke();
 
   ctx.fillStyle = "#fff";
