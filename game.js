@@ -3,18 +3,23 @@ const ctx = canvas.getContext("2d");
 
 const $ = id => document.getElementById(id);
 
-const introScreen = $("intro-screen");
-const battleScreen = $("battle-screen");
-const victoryScreen = $("victory-screen");
-const endingScreen = $("ending-screen");
-const gameOverScreen = $("game-over-screen");
-const startButton = $("start-button");
-const retryButton = $("retry-button");
-const restartButton = $("restart-button");
-const continueButton = $("continue-button");
+const screens = {
+  intro: $("intro-screen"),
+  battle: $("battle-screen"),
+  victory: $("victory-screen"),
+  ending: $("ending-screen"),
+  gameover: $("game-over-screen")
+};
 
-const attackButton = $("attack-button");
-const healButton = $("heal-button");
+const buttons = {
+  start: $("start-button"),
+  retry: $("retry-button"),
+  restart: $("restart-button"),
+  continue: $("continue-button"),
+  attack: $("attack-button"),
+  heal: $("heal-button")
+};
+
 const enemyName = $("enemy-name");
 const enemyHealth = $("enemy-health");
 const playerHealth = $("player-health");
@@ -22,7 +27,6 @@ const enemyHpText = $("enemy-hp-text");
 const playerHpText = $("player-hp-text");
 const battleMessage = $("battle-message");
 const healCounter = $("heal-counter");
-
 const victoryTitle = $("victory-title");
 const victoryMessage = $("victory-message");
 const endingMessage = $("ending-message");
@@ -32,15 +36,18 @@ const H = canvas.height;
 
 const MAX_PLAYER_HP = 100;
 const MAX_HEALS = 3;
+
 let state = "intro";
 let progress = 0;
 let lastTime = 0;
+let animationTime = 0;
 let playerHP = MAX_PLAYER_HP;
 let currentEnemy = null;
 let healUses = 0;
-let snowflakes = [];
-let animationTime = 0;
 let actionLocked = false;
+let snowflakes = [];
+let timers = [];
+let gameVersion = 0;
 
 const enemies = [
   {
@@ -90,7 +97,10 @@ const loveMessages = [
   "Can't wait to hug you again. ❤️",
   "You make even the hardest days better.",
   "I wish I could cuddle with you right now.",
-  "You're always in my heart. ❤️"
+  "You're always in my heart. ❤️",
+  "I miss your hugs. Sending you a thousand kisses!",
+  "You're my safe place. ❤️",
+  "I hope you know how special you are to me."
 ];
 
 const coffeeMessages = [
@@ -103,6 +113,35 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function later(callback, delay) {
+  const version = gameVersion;
+
+  const timer = setTimeout(() => {
+    timers = timers.filter(item => item !== timer);
+
+    if (version === gameVersion) {
+      callback();
+    }
+  }, delay);
+
+  timers.push(timer);
+}
+
+function clearTimers() {
+  timers.forEach(clearTimeout);
+  timers = [];
+}
+
+function showScreen(name) {
+  Object.values(screens).forEach(screen => {
+    screen.classList.add("hidden");
+  });
+
+  if (name) {
+    screens[name].classList.remove("hidden");
+  }
+}
+
 function drawPixel(x, y, width, height, color) {
   ctx.fillStyle = color;
   ctx.fillRect(
@@ -113,13 +152,24 @@ function drawPixel(x, y, width, height, color) {
   );
 }
 
+// The same curve is used for the road and Evie's movement.
+function roadX(p) {
+  return 135
+    + Math.sin(p * Math.PI * 2.1) * 29
+    + Math.sin(p * Math.PI * 4.0) * 9;
+}
+
+function roadY(p) {
+  return 430 - p * 350;
+}
+
 function drawPrincess(x, y, scale = 1) {
   ctx.save();
   ctx.translate(Math.round(x), Math.round(y));
   ctx.scale(scale, scale);
 
   const bob = state === "walking"
-    ? Math.sin(animationTime * 8) * 1.5
+    ? Math.sin(animationTime * 9) * 1.5
     : Math.sin(animationTime * 3) * 0.5;
 
   ctx.translate(0, bob);
@@ -183,8 +233,7 @@ function drawEnemy(x, y, type, scale = 1) {
   ctx.translate(Math.round(x), Math.round(y));
   ctx.scale(scale, scale);
 
-  const bob = Math.sin(animationTime * 4) * 1.5;
-  ctx.translate(0, bob);
+  ctx.translate(0, Math.sin(animationTime * 4) * 1.5);
 
   if (type === 0) {
     // The Fatigue
@@ -194,7 +243,6 @@ function drawEnemy(x, y, type, scale = 1) {
     drawPixel(14, -4, 5, 13, "#708b9c");
     drawPixel(-10, 13, 7, 5, "#536d7d");
     drawPixel(4, 13, 7, 5, "#536d7d");
-
     drawPixel(-8, -4, 5, 2, "#33434e");
     drawPixel(4, -4, 5, 2, "#33434e");
     drawPixel(-3, 5, 7, 2, "#33434e");
@@ -206,15 +254,12 @@ function drawEnemy(x, y, type, scale = 1) {
     drawPixel(-13, -17, 26, 25, "#d5a37c");
     drawPixel(-10, -23, 20, 8, "#47383a");
     drawPixel(-14, -12, 28, 5, "#47383a");
-
     drawPixel(-8, -7, 4, 4, "#332a2b");
     drawPixel(4, -7, 4, 4, "#332a2b");
     drawPixel(-4, 2, 8, 4, "#6b3535");
-
     drawPixel(-17, 8, 34, 12, "#5b718e");
     drawPixel(-10, 20, 7, 5, "#353746");
     drawPixel(3, 20, 7, 5, "#353746");
-
     drawPixel(-3, -20, 6, 3, "#d9d4c9");
   }
 
@@ -224,7 +269,6 @@ function drawEnemy(x, y, type, scale = 1) {
     drawPixel(-13, -21, 26, 10, "#786a99");
     drawPixel(-20, -8, 5, 16, "#786a99");
     drawPixel(15, -8, 5, 16, "#786a99");
-
     drawPixel(-10, -7, 5, 5, "#ffe7a1");
     drawPixel(5, -7, 5, 5, "#ffe7a1");
     drawPixel(-8, -6, 2, 3, "#30253d");
@@ -244,7 +288,6 @@ function drawTree(x, y, scale = 1) {
   ctx.scale(scale, scale);
 
   drawPixel(-3, 0, 6, 12, "#65504a");
-
   drawPixel(-10, -13, 20, 14, "#28544d");
   drawPixel(-8, -23, 16, 13, "#31685c");
   drawPixel(-5, -31, 10, 11, "#397768");
@@ -262,35 +305,40 @@ function drawForest() {
   ctx.fillRect(0, 70, W, 120);
   ctx.fillRect(0, 310, W, 110);
 
-  // Winding path — centered and clear of the trees
-  ctx.fillStyle = "#e8d9c0";
-  ctx.beginPath();
-  ctx.moveTo(95, 0);
-  ctx.lineTo(175, 0);
-  ctx.lineTo(168, 110);
-  ctx.lineTo(182, 220);
-  ctx.lineTo(168, 340);
-  ctx.lineTo(175, 480);
-  ctx.lineTo(95, 480);
-  ctx.lineTo(102, 340);
-  ctx.lineTo(88, 220);
-  ctx.lineTo(102, 110);
-  ctx.closePath();
-  ctx.fill();
-
-  // Snow on the path
-  ctx.fillStyle = "#f7ead5";
-  ctx.fillRect(121, 0, 28, 80);
-
-  // Trees along the edges of the path
+  // Trees on both sides
   for (let y = -20; y < H + 50; y += 90) {
     drawTree(22, y + 25, 1.1);
     drawTree(245, y + 60, 1.1);
-    drawTree(58, y + 80, 0.7);
-    drawTree(212, y + 5, 0.7);
+    drawTree(65, y + 80, 0.7);
+    drawTree(195, y + 5, 0.7);
   }
 
-  // Snow patches
+  // Winding path
+  ctx.beginPath();
+
+  for (let i = 0; i <= 100; i++) {
+    const p = i / 100;
+    const x = roadX(p);
+    const y = roadY(p);
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#e8d9c0";
+  ctx.lineWidth = 68;
+  ctx.stroke();
+
+  ctx.strokeStyle = "#f7ead5";
+  ctx.lineWidth = 53;
+  ctx.stroke();
+
+  // Small snow patches
   ctx.fillStyle = "#fff";
   for (let i = 0; i < 32; i++) {
     const x = (i * 73) % W;
@@ -328,6 +376,17 @@ function drawBeach() {
   drawPixel(132, 229, 4, 4, "#d87983");
 }
 
+function updateSnow(delta) {
+  snowflakes.forEach(flake => {
+    flake.y += flake.speed * delta;
+
+    if (flake.y > H) {
+      flake.y = 0;
+      flake.x = random(0, W);
+    }
+  });
+}
+
 function drawSnow() {
   snowflakes.forEach(flake => {
     drawPixel(
@@ -340,17 +399,6 @@ function drawSnow() {
   });
 }
 
-function updateSnow(delta) {
-  snowflakes.forEach(flake => {
-    flake.y += flake.speed * delta;
-
-    if (flake.y > H) {
-      flake.y = 0;
-      flake.x = random(0, W);
-    }
-  });
-}
-
 function render() {
   ctx.clearRect(0, 0, W, H);
 
@@ -359,14 +407,7 @@ function render() {
     return;
   }
 
-  if (state === "intro") {
-    drawForest();
-    drawSnow();
-    drawPrincess(135, 360);
-    return;
-  }
-
-  if (state === "battle" && currentEnemy) {
+  if (state === "battle") {
     ctx.fillStyle = "#c5dce3";
     ctx.fillRect(0, 0, W, H);
 
@@ -376,42 +417,52 @@ function render() {
     drawTree(25, 250, 1.1);
     drawTree(245, 250, 1.1);
 
-    drawEnemy(
-      135,
-      160,
-      enemies.indexOf(currentEnemy),
-      2.1
-    );
+    if (currentEnemy) {
+      drawEnemy(
+        135,
+        160,
+        enemies.indexOf(currentEnemy),
+        2.1
+      );
+    }
 
     drawPrincess(135, 325, 1.8);
+    drawSnow();
     return;
   }
 
   drawForest();
 
-  const heroY = 390 - progress * 300;
-  drawPrincess(135, heroY);
+  const heroX = roadX(progress);
+  const heroY = roadY(progress);
 
-  enemies.forEach((enemy, index) => {
-    if (
-      !enemy.defeated &&
-      progress < enemy.position &&
-      progress > enemy.position - 0.13
-    ) {
-      drawEnemy(135, heroY - 55, index, 1.1);
-    }
-  });
+  // Show the next enemy on the path
+  const upcomingEnemy = enemies.find(enemy =>
+    !enemy.defeated &&
+    enemy.position > progress &&
+    enemy.position - progress < 0.18
+  );
 
+  if (upcomingEnemy) {
+    const enemyIndex = enemies.indexOf(upcomingEnemy);
+    const enemyProgress = upcomingEnemy.position;
+
+    drawEnemy(
+      roadX(enemyProgress),
+      roadY(enemyProgress) - 30,
+      enemyIndex,
+      1.1
+    );
+  }
+
+  drawPrincess(heroX, heroY);
   drawSnow();
 }
 
 function updateHealthBars() {
-  const enemyPercent = Math.max(
-    0,
-    currentEnemy
-      ? currentEnemy.hp / currentEnemy.maxHP * 100
-      : 0
-  );
+  const enemyPercent = currentEnemy
+    ? Math.max(0, currentEnemy.hp / currentEnemy.maxHP * 100)
+    : 0;
 
   const playerPercent = Math.max(
     0,
@@ -445,13 +496,12 @@ function startBattle(enemy) {
   enemyName.textContent = enemy.name;
   battleMessage.textContent = "A new challenge appeared!";
 
-  attackButton.disabled = false;
-  healButton.disabled = false;
+  buttons.attack.disabled = false;
+  buttons.heal.disabled = false;
 
   updateHealthBars();
   updateHealCounter();
-
-  battleScreen.classList.remove("hidden");
+  showScreen("battle");
 }
 
 function enemyAttack() {
@@ -474,45 +524,51 @@ function enemyAttack() {
   updateHealthBars();
 
   if (playerHP <= 0) {
-    setTimeout(gameOver, 700);
+    later(gameOver, 700);
     return;
   }
 
   actionLocked = false;
-  attackButton.disabled = false;
-  healButton.disabled = healUses >= MAX_HEALS;
+  buttons.attack.disabled = false;
+  buttons.heal.disabled = healUses >= MAX_HEALS;
 }
 
 function playerAttack() {
-  if (state !== "battle" || actionLocked) return;
+  if (state !== "battle" || actionLocked || !currentEnemy) {
+    return;
+  }
 
   actionLocked = true;
-  attackButton.disabled = true;
-  healButton.disabled = true;
+  buttons.attack.disabled = true;
+  buttons.heal.disabled = true;
 
-  const damage = random(22, 34);
+  const damage = random(27, 37);
 
   currentEnemy.hp = Math.max(
     0,
     currentEnemy.hp - damage
   );
 
+  const message = coffeeMessages[
+    random(0, coffeeMessages.length - 1)
+  ];
+
   battleMessage.textContent =
-    coffeeMessages[
-      random(0, coffeeMessages.length - 1)
-    ] + " (" + damage + " damage!)";
+    message + " (" + damage + " damage!)";
 
   updateHealthBars();
 
   if (currentEnemy.hp <= 0) {
-    setTimeout(winBattle, 800);
+    later(winBattle, 800);
   } else {
-    setTimeout(enemyAttack, 900);
+    later(enemyAttack, 900);
   }
 }
 
 function playerHeal() {
-  if (state !== "battle" || actionLocked) return;
+  if (state !== "battle" || actionLocked || !currentEnemy) {
+    return;
+  }
 
   if (healUses >= MAX_HEALS) {
     battleMessage.textContent =
@@ -527,8 +583,8 @@ function playerHeal() {
   }
 
   actionLocked = true;
-  attackButton.disabled = true;
-  healButton.disabled = true;
+  buttons.attack.disabled = true;
+  buttons.heal.disabled = true;
 
   healUses++;
 
@@ -549,7 +605,7 @@ function playerHeal() {
   updateHealthBars();
   updateHealCounter();
 
-  setTimeout(enemyAttack, 900);
+  later(enemyAttack, 900);
 }
 
 function winBattle() {
@@ -558,42 +614,37 @@ function winBattle() {
   currentEnemy.defeated = true;
   actionLocked = true;
 
-  attackButton.disabled = true;
-  healButton.disabled = true;
+  buttons.attack.disabled = true;
+  buttons.heal.disabled = true;
 
   const defeatedEnemy = currentEnemy;
 
-  setTimeout(() => {
-    battleScreen.classList.add("hidden");
+  state = "victory";
 
-    victoryTitle.textContent =
-      defeatedEnemy.victoryTitle;
+  victoryTitle.textContent =
+    defeatedEnemy.victoryTitle;
 
-    victoryMessage.textContent =
-      defeatedEnemy.victoryMessage;
+  victoryMessage.textContent =
+    defeatedEnemy.victoryMessage;
 
-    victoryScreen.classList.remove("hidden");
-
-    state = "victory";
-  }, 800);
+  showScreen("victory");
 }
 
 function continueAdventure() {
   if (state !== "victory") return;
 
-  victoryScreen.classList.add("hidden");
-
   currentEnemy = null;
   actionLocked = false;
 
+  showScreen(null);
   state = "walking";
 }
 
 function gameOver() {
-  state = "gameover";
+  if (state !== "battle") return;
 
-  battleScreen.classList.add("hidden");
-  gameOverScreen.classList.remove("hidden");
+  state = "gameover";
+  showScreen("gameover");
 }
 
 function finishGame() {
@@ -606,10 +657,13 @@ function finishGame() {
     "remember that someone is always cheering for you. " +
     "I love you. ❤️";
 
-  endingScreen.classList.remove("hidden");
+  showScreen("ending");
 }
 
 function startGame() {
+  gameVersion++;
+  clearTimers();
+
   progress = 0;
   playerHP = MAX_PLAYER_HP;
   currentEnemy = null;
@@ -621,31 +675,29 @@ function startGame() {
     enemy.hp = enemy.maxHP;
   });
 
-  introScreen.classList.add("hidden");
-  battleScreen.classList.add("hidden");
-  victoryScreen.classList.add("hidden");
-  endingScreen.classList.add("hidden");
-  gameOverScreen.classList.add("hidden");
+  buttons.attack.disabled = false;
+  buttons.heal.disabled = false;
 
   updateHealthBars();
   updateHealCounter();
 
   state = "walking";
+  showScreen(null);
 }
 
 function gameLoop(timestamp) {
-  const delta = Math.min(
-    (timestamp - lastTime) / 1000 || 0,
-    0.05
-  );
+  const delta = lastTime === 0
+    ? 0
+    : Math.min((timestamp - lastTime) / 1000, 0.05);
 
   lastTime = timestamp;
   animationTime += delta;
 
-  if (state === "walking") {
-    progress += delta * 0.035;
+  updateSnow(delta);
 
-    updateSnow(delta);
+  if (state === "walking") {
+    // Automatic movement along the winding path
+    progress += delta * 0.09;
 
     if (progress >= 1) {
       finishGame();
@@ -660,10 +712,6 @@ function gameLoop(timestamp) {
         startBattle(nextEnemy);
       }
     }
-  }
-
-  if (state === "battle" || state === "victory") {
-    updateSnow(delta);
   }
 
   render();
@@ -683,13 +731,15 @@ function initSnow() {
   }
 }
 
-startButton.addEventListener("click", startGame);
-retryButton.addEventListener("click", startGame);
-restartButton.addEventListener("click", startGame);
-continueButton.addEventListener("click", continueAdventure);
-attackButton.addEventListener("click", playerAttack);
-healButton.addEventListener("click", playerHeal);
+// Buttons
+buttons.start.addEventListener("click", startGame);
+buttons.retry.addEventListener("click", startGame);
+buttons.restart.addEventListener("click", startGame);
+buttons.continue.addEventListener("click", continueAdventure);
+buttons.attack.addEventListener("click", playerAttack);
+buttons.heal.addEventListener("click", playerHeal);
 
+// Initial setup
 initSnow();
 updateHealthBars();
 updateHealCounter();
