@@ -313,11 +313,11 @@ function drawForest() {
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.strokeStyle = "#e8d9c0";
-  ctx.lineWidth = 64;
+  ctx.lineWidth = 24;
   ctx.stroke();
 
   ctx.strokeStyle = "#f7ead5";
-  ctx.lineWidth = 54;
+  ctx.lineWidth = 14;
   ctx.stroke();
 
   ctx.fillStyle = "#fff";
