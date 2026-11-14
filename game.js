@@ -1,3 +1,4 @@
+
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 
@@ -10,7 +11,6 @@ const screens = {
   ending: $("ending-screen"),
   gameover: $("game-over-screen")
 };
-
 const buttons = {
   start: $("start-button"),
   retry: $("retry-button"),
@@ -19,7 +19,6 @@ const buttons = {
   attack: $("attack-button"),
   heal: $("heal-button")
 };
-
 const enemyName = $("enemy-name");
 const enemyHealth = $("enemy-health");
 const playerHealth = $("player-health");
@@ -35,15 +34,12 @@ const W = canvas.width;
 const H = canvas.height;
 
 const MAX_PLAYER_HP = 100;
-const MAX_HEALS = 3;
-
 let state = "intro";
 let progress = 0;
 let lastTime = 0;
 let animationTime = 0;
 let playerHP = MAX_PLAYER_HP;
 let currentEnemy = null;
-let healUses = 0;
 let actionLocked = false;
 let snowflakes = [];
 let timers = [];
@@ -173,7 +169,6 @@ function drawPrincess(x, y, scale = 1) {
     : Math.sin(animationTime * 3) * 0.5;
 
   ctx.translate(0, bob);
-
   // Curly dark hair
   drawPixel(-10, -23, 20, 18, "#39272b");
   drawPixel(-13, -19, 5, 19, "#39272b");
@@ -190,7 +185,6 @@ function drawPrincess(x, y, scale = 1) {
   // Eyes
   drawPixel(-4, -18, 2, 2, "#593a2f");
   drawPixel(4, -18, 2, 2, "#593a2f");
-
   // Hair fringe
   drawPixel(-7, -25, 7, 5, "#39272b");
   drawPixel(1, -27, 6, 5, "#39272b");
@@ -204,7 +198,6 @@ function drawPrincess(x, y, scale = 1) {
   // Neck and collar
   drawPixel(-3, -10, 6, 5, "#edbd9e");
   drawPixel(-7, -8, 14, 4, "#fff0d9");
-
   // Winter dress
   drawPixel(-9, -5, 18, 15, "#a85e83");
   drawPixel(-13, 5, 26, 7, "#a85e83");
@@ -218,7 +211,6 @@ function drawPrincess(x, y, scale = 1) {
   // Boots
   drawPixel(-8, 12, 6, 5, "#57465e");
   drawPixel(2, 12, 6, 5, "#57465e");
-
   // Hair curls
   drawPixel(-14, -15, 4, 4, "#51343a");
   drawPixel(10, -13, 4, 4, "#51343a");
@@ -234,7 +226,6 @@ function drawEnemy(x, y, type, scale = 1) {
   ctx.scale(scale, scale);
 
   ctx.translate(0, Math.sin(animationTime * 4) * 1.5);
-
   if (type === 0) {
     // The Fatigue
     drawPixel(-15, -12, 30, 25, "#708b9c");
@@ -248,7 +239,6 @@ function drawEnemy(x, y, type, scale = 1) {
     drawPixel(-3, 5, 7, 2, "#33434e");
     drawPixel(-4, -21, 8, 5, "#e5eef0");
   }
-
   if (type === 1) {
     // The Annoying Colleague
     drawPixel(-13, -17, 26, 25, "#d5a37c");
@@ -262,7 +252,6 @@ function drawEnemy(x, y, type, scale = 1) {
     drawPixel(3, 20, 7, 5, "#353746");
     drawPixel(-3, -20, 6, 3, "#d9d4c9");
   }
-
   if (type === 2) {
     // The Examinator
     drawPixel(-17, -14, 34, 30, "#55466f");
@@ -278,7 +267,6 @@ function drawEnemy(x, y, type, scale = 1) {
     drawPixel(4, 16, 8, 6, "#403652");
     drawPixel(-5, -27, 10, 7, "#d9c4ff");
   }
-
   ctx.restore();
 }
 
@@ -300,7 +288,6 @@ function drawTree(x, y, scale = 1) {
 function drawForest() {
   ctx.fillStyle = "#dcebf0";
   ctx.fillRect(0, 0, W, H);
-
   ctx.fillStyle = "#c0dce5";
   ctx.fillRect(0, 70, W, 120);
   ctx.fillRect(0, 310, W, 110);
@@ -320,7 +307,6 @@ function drawForest() {
     const p = i / 100;
     const x = roadX(p);
     const y = roadY(p);
-
     if (i === 0) {
       ctx.moveTo(x, y);
     } else {
@@ -331,11 +317,11 @@ function drawForest() {
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.strokeStyle = "#e8d9c0";
-  ctx.lineWidth = 68;
+  ctx.lineWidth = 54;
   ctx.stroke();
 
   ctx.strokeStyle = "#f7ead5";
-  ctx.lineWidth = 53;
+  ctx.lineWidth = 41;
   ctx.stroke();
 
   // Small snow patches
@@ -368,7 +354,6 @@ function drawBeach() {
   ctx.fillRect(0, 120, W, 8);
 
   drawPrincess(135, 275, 1.7);
-
   // Heart
   drawPixel(125, 215, 7, 7, "#d87983");
   drawPixel(136, 215, 7, 7, "#d87983");
@@ -416,7 +401,6 @@ function render() {
 
     drawTree(25, 250, 1.1);
     drawTree(245, 250, 1.1);
-
     if (currentEnemy) {
       drawEnemy(
         135,
@@ -442,7 +426,6 @@ function render() {
     enemy.position > progress &&
     enemy.position - progress < 0.18
   );
-
   if (upcomingEnemy) {
     const enemyIndex = enemies.indexOf(upcomingEnemy);
     const enemyProgress = upcomingEnemy.position;
@@ -468,7 +451,6 @@ function updateHealthBars() {
     0,
     playerHP / MAX_PLAYER_HP * 100
   );
-
   enemyHealth.style.width = enemyPercent + "%";
   playerHealth.style.width = playerPercent + "%";
 
@@ -481,16 +463,13 @@ function updateHealthBars() {
 }
 
 function updateHealCounter() {
-  healCounter.textContent =
-    "Boyfriend texts left: " + (MAX_HEALS - healUses);
+  healCounter.textContent = "Unlimited boyfriend texts ❤️";
 }
 
 function startBattle(enemy) {
   state = "battle";
   currentEnemy = enemy;
   currentEnemy.hp = currentEnemy.maxHP;
-
-  healUses = 0;
   actionLocked = false;
 
   enemyName.textContent = enemy.name;
@@ -509,7 +488,6 @@ function enemyAttack() {
 
   const index = random(0, 1);
   const attack = currentEnemy.attacks[index];
-
   const damage = random(
     currentEnemy.damage[index],
     currentEnemy.damage[index] + 3
@@ -530,7 +508,7 @@ function enemyAttack() {
 
   actionLocked = false;
   buttons.attack.disabled = false;
-  buttons.heal.disabled = healUses >= MAX_HEALS;
+  buttons.heal.disabled = false;
 }
 
 function playerAttack() {
@@ -542,7 +520,7 @@ function playerAttack() {
   buttons.attack.disabled = true;
   buttons.heal.disabled = true;
 
-  const damage = random(27, 37);
+  const damage = random(20, 28);
 
   currentEnemy.hp = Math.max(
     0,
@@ -557,7 +535,6 @@ function playerAttack() {
     message + " (" + damage + " damage!)";
 
   updateHealthBars();
-
   if (currentEnemy.hp <= 0) {
     later(winBattle, 800);
   } else {
@@ -570,12 +547,6 @@ function playerHeal() {
     return;
   }
 
-  if (healUses >= MAX_HEALS) {
-    battleMessage.textContent =
-      "No more messages for now! ❤️";
-    return;
-  }
-
   if (playerHP >= MAX_PLAYER_HP) {
     battleMessage.textContent =
       "You're already doing great! ❤️";
@@ -585,8 +556,6 @@ function playerHeal() {
   actionLocked = true;
   buttons.attack.disabled = true;
   buttons.heal.disabled = true;
-
-  healUses++;
 
   const healing = random(24, 32);
 
@@ -610,7 +579,6 @@ function playerHeal() {
 
 function winBattle() {
   if (state !== "battle" || !currentEnemy) return;
-
   currentEnemy.defeated = true;
   actionLocked = true;
 
@@ -663,11 +631,9 @@ function finishGame() {
 function startGame() {
   gameVersion++;
   clearTimers();
-
   progress = 0;
   playerHP = MAX_PLAYER_HP;
   currentEnemy = null;
-  healUses = 0;
   actionLocked = false;
 
   enemies.forEach(enemy => {
@@ -689,7 +655,6 @@ function gameLoop(timestamp) {
   const delta = lastTime === 0
     ? 0
     : Math.min((timestamp - lastTime) / 1000, 0.05);
-
   lastTime = timestamp;
   animationTime += delta;
 
@@ -713,7 +678,6 @@ function gameLoop(timestamp) {
       }
     }
   }
-
   render();
   requestAnimationFrame(gameLoop);
 }
