@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#172638">
+  <meta name="theme-color" content="#101b2a">
   <title>EVIE: A Winter Adventure</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -20,7 +20,7 @@
       </canvas>
 
       <div id="intro-screen" class="screen">
-        <div class="intro-content">
+        <div class="panel">
           <h1>A Winter Adventure</h1>
           <p>A little journey through a snowy forest...</p>
           <button id="start-button">Start Adventure</button>
@@ -28,7 +28,7 @@
       </div>
 
       <div id="battle-screen" class="screen hidden">
-        <div class="battle-panel">
+        <div class="panel battle-panel">
           <h2 id="enemy-name">Enemy</h2>
 
           <div class="health-label">
@@ -61,7 +61,7 @@
       </div>
 
       <div id="victory-screen" class="screen hidden">
-        <div class="ending-content">
+        <div class="panel ending-panel">
           <div class="victory-heart">♥</div>
           <h1 id="victory-title">Victory!</h1>
           <p id="victory-message"></p>
@@ -70,14 +70,14 @@
       </div>
 
       <div id="ending-screen" class="screen hidden">
-        <div class="ending-content">
+        <div class="panel ending-panel">
           <p id="ending-message"></p>
           <button id="restart-button">Play Again ❤️</button>
         </div>
       </div>
 
       <div id="game-over-screen" class="screen hidden">
-        <div class="ending-content">
+        <div class="panel ending-panel">
           <h1>Take a Little Break</h1>
           <p>The journey was difficult, but you can always try again.</p>
           <button id="retry-button">Try Again ❤️</button>
