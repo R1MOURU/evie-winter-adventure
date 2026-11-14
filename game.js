@@ -157,7 +157,7 @@ function roadX(p) {
 }
 
 function roadY(p) {
-  return 470 - p * 460;
+  return 420 - p * 340;
 }
 
 function drawPrincess(x, y, scale = 1) {
@@ -570,7 +570,7 @@ function playerHeal() {
   updateHealthBars();
   updateHealCounter();
 
-  later(enemyAttack, 2000);
+  later(enemyAttack, 3000);
 }
 
 function winBattle() {
