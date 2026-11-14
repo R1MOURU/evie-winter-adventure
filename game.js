@@ -46,6 +46,7 @@ let actionLocked = false;
 let snowflakes = [];
 let timers = [];
 let gameVersion = 0;
+let lastLoveMessage = "";
 
 const enemies = [
   {
@@ -88,17 +89,29 @@ const enemies = [
 
 const loveMessages = [
   "Just thinking about you makes me smile❤️",
-  "I wish you were here with me right now",
-  "You're my favorite person in the whole world",
+  "I wish you were here with me right now🥺",
+  "You're my favorite person in the whole world❤️",
   "Sending you a little kiss!💋",
-  "I love you more than all the stars",
+  "I love you more than all the stars✨",
   "Can't wait to hug you again❤️",
-  "You make even the hardest days better",
-  "I wish I could cuddle with you right now.",
+  "You make even the hardest days better💕",
+  "I wish I could cuddle with you right now🥰",
   "You're always in my heart❤️",
-  "I miss your hugs. Sending you a thousand kisses!",
+  "I miss your hugs. Sending you a thousand kisses!💋",
   "You're my safe place❤️",
-  "I hope you know how special you are to me"
+  "I hope you know how special you are to me💕",
+  "If I could, I'd hold your hand all day🥰",
+  "You are the sweetest part of my life❤️",
+  "Every day is better with you in it✨",
+  "I wish I could give you a big warm hug right now🤗",
+  "No matter how far apart we are, I'm always with you❤️",
+  "You're the first person I want to tell everything to💕",
+  "I hope this message makes you smile😘",
+  "I'd choose you in every lifetime❤️",
+  "You deserve all the happiness in the world🌸",
+  "Just a reminder that you're loved more than you know💖",
+  "I can't wait for our next adventure together🥰",
+  "You make my heart feel at home❤️"
 ];
 
 const coffeeMessages = [
@@ -109,6 +122,20 @@ const coffeeMessages = [
 
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomLoveMessage() {
+  const availableMessages = loveMessages.filter(
+    message => message !== lastLoveMessage
+  );
+
+  const message = availableMessages[
+    random(0, availableMessages.length - 1)
+  ];
+
+  lastLoveMessage = message;
+
+  return message;
 }
 
 function later(callback, delay) {
@@ -515,7 +542,7 @@ function playerAttack() {
   buttons.attack.disabled = true;
   buttons.heal.disabled = true;
 
-  const damage = random(20, 28);
+  const damage = random(15, 21);
 
   currentEnemy.hp = Math.max(
     0,
@@ -553,16 +580,14 @@ function playerHeal() {
   buttons.attack.disabled = true;
   buttons.heal.disabled = true;
 
-  const healing = random(24, 32);
+  const healing = random(30, 40);
 
   playerHP = Math.min(
     MAX_PLAYER_HP,
     playerHP + healing
   );
 
-  const message = loveMessages[
-    random(0, loveMessages.length - 1)
-  ];
+  const message = getRandomLoveMessage();
 
   battleMessage.textContent =
     message + " (+" + healing + " HP)";
@@ -570,7 +595,7 @@ function playerHeal() {
   updateHealthBars();
   updateHealCounter();
 
-  later(enemyAttack, 2800);
+  later(enemyAttack, 4500);
 }
 
 function winBattle() {
@@ -631,6 +656,7 @@ function startGame() {
 
   progress = 0;
   playerHP = MAX_PLAYER_HP;
+  lastLoveMessage = "";
   currentEnemy = null;
   actionLocked = false;
 
