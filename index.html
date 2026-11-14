@@ -30,26 +30,36 @@
         </div>
       </div>
 
-      <div id="dialogue-box" class="dialogue-box hidden">
-        <p id="dialogue-text"></p>
-        <button id="dialogue-button">Continue</button>
-      </div>
-
       <div id="battle-screen" class="screen hidden">
         <div class="battle-panel">
+
           <h2 id="enemy-name">Enemy</h2>
-          <div class="health-container">
-            <div class="health-bar">
-              <div id="enemy-health" class="health-fill"></div>
-            </div>
+
+          <div class="health-label">
+            <span>Enemy HP</span>
+            <span id="enemy-hp-text">65 / 65</span>
+          </div>
+          <div class="health-bar">
+            <div id="enemy-health" class="health-fill enemy-fill"></div>
           </div>
 
-          <p id="battle-message">An enemy appeared!</p>
+          <div class="health-label player-label">
+            <span>Princess Evie</span>
+            <span id="player-hp-text">100 / 100</span>
+          </div>
+          <div class="health-bar">
+            <div id="player-health" class="health-fill player-fill"></div>
+          </div>
+
+          <p id="battle-message">A new challenge appeared!</p>
 
           <div id="battle-actions">
             <button id="attack-button">Coffee Splash</button>
             <button id="heal-button">Text My Boyfriend</button>
           </div>
+
+          <p id="heal-counter" class="heal-counter">Healing messages: 2</p>
+
         </div>
       </div>
 
@@ -57,6 +67,14 @@
         <div class="ending-content">
           <h1>Finally, the beach!</h1>
           <p id="ending-message"></p>
+        </div>
+      </div>
+
+      <div id="game-over-screen" class="screen hidden">
+        <div class="ending-content">
+          <h1>Take a Little Break</h1>
+          <p>The journey was difficult, but you can always try again.</p>
+          <button id="retry-button">Try Again ❤️</button>
         </div>
       </div>
 
