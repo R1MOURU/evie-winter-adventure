@@ -157,7 +157,7 @@ function roadX(p) {
 }
 
 function roadY(p) {
-  return 230 - p * 150;
+  return 470 - p * 460;
 }
 
 function drawPrincess(x, y, scale = 1) {
