@@ -24,6 +24,7 @@
 
       <div id="intro-screen" class="screen">
         <div class="intro-content">
+          <div class="intro-decoration">❄</div>
           <h1>A Winter Adventure</h1>
           <p>A little journey through a snowy forest...</p>
           <button id="start-button">Start Adventure</button>
@@ -35,53 +36,57 @@
 
           <h2 id="enemy-name">Enemy</h2>
 
-          <div class="health-label">
-            <span>Enemy HP</span>
-            <span id="enemy-hp-text">65 / 65</span>
-          </div>
-          <div class="health-bar">
-            <div id="enemy-health" class="health-fill enemy-fill"></div>
-          </div>
-
-          <div class="health-label player-label">
-            <span>Princess Evie</span>
-            <span id="player-hp-text">100 / 100</span>
-          </div>
-          <div class="health-bar">
-            <div id="player-health" class="health-fill player-fill"></div>
+          <div class="health-section">
+            <div class="health-label">
+              <span>ENEMY</span>
+              <span id="enemy-hp-text">100 / 100</span>
+            </div>
+            <div class="health-bar">
+              <div id="enemy-health" class="health-fill enemy-fill"></div>
+            </div>
           </div>
 
-          <p id="battle-message">A new challenge appeared!</p>
+          <div class="health-section">
+            <div class="health-label">
+              <span>PRINCESS EVIE</span>
+              <span id="player-hp-text">100 / 100</span>
+            </div>
+            <div class="health-bar">
+              <div id="player-health" class="health-fill player-fill"></div>
+            </div>
+          </div>
+
+          <p id="battle-message">An enemy appeared!</p>
 
           <div id="battle-actions">
             <button id="attack-button">Coffee Splash</button>
             <button id="heal-button">Text My Boyfriend</button>
           </div>
 
-          <p id="heal-counter" class="heal-counter">Healing messages: 2</p>
-
         </div>
       </div>
 
       <div id="ending-screen" class="screen hidden">
         <div class="ending-content">
+          <div class="ending-decoration">♥</div>
           <h1>Finally, the beach!</h1>
           <p id="ending-message"></p>
+          <p class="ending-signature">Made with love ❤️</p>
         </div>
       </div>
 
-      <div id="game-over-screen" class="screen hidden">
+      <div id="gameover-screen" class="screen hidden">
         <div class="ending-content">
-          <h1>Take a Little Break</h1>
-          <p>The journey was difficult, but you can always try again.</p>
-          <button id="retry-button">Try Again ❤️</button>
+          <h1>Take a Little Rest</h1>
+          <p>Even princesses need a break sometimes.</p>
+          <button id="restart-button">Try Again</button>
         </div>
       </div>
 
     </section>
 
     <footer class="game-footer">
-      <p>Made with love ❤️</p>
+      <p>A little adventure, made with love ❤️</p>
     </footer>
 
   </main>
